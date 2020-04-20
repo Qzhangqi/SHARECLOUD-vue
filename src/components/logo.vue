@@ -4,7 +4,7 @@
             S H A R E C L O U D
         </h1>
         <p id="logo_info">
-            便捷的文件分享服务
+            将文件变为可供分享的链接
         </p>
     </div>
 </template>
@@ -19,6 +19,7 @@
     #logo_div {
         height: 90px;
         padding-left: 20px;
+        float: left;
     }
 
     #logo{

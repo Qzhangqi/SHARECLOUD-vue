@@ -1,32 +1,44 @@
 <template>
   <v-app>
     <v-content>
-      <v-container class="fill-height" fluid>
-        <v-row align="center" justify="center">
-          <table>
-            <tr>
-              <logo></logo>
-            </tr>
-            <tr>
-              <v-card id="all_card" raised>
-                <table>
-                  <tr>
-                    <td>
-                      <login></login>
-                    </td>
-                    <td>
-                      <upload></upload>
-                    </td>
-                    <td>
-                      <file></file>
-                    </td>
-                  </tr>
-                </table>
-              </v-card>
-            </tr>
-          </table>
-        </v-row>
-      </v-container>
+      <div style="height: 15%; padding-top: 1.5%">
+        <v-alert type="success"
+                 border="top"
+                 elevation="6"
+                 transition="scroll-y-transition"
+                 :value="upload_success"
+                 style="width: 15%; margin: 0 auto;">
+          上传成功
+        </v-alert>
+      </div>
+
+      <v-row justify="center">
+        <table>
+          <tr>
+            <logo></logo>
+            <account v-if="have_account"></account>
+          </tr>
+          <tr>
+            <v-card id="all_card" raised>
+              <table>
+                <tr>
+                  <td v-if="have_account">
+                    <login></login>
+                  </td>
+                  <td>
+                    <upload></upload>
+                  </td>
+                  <td v-if="have_file">
+                    <file></file>
+                  </td>
+                </tr>
+              </table>
+            </v-card>
+          </tr>
+        </table>
+      </v-row>
+              <v-btn @click="change_have_account">have_account</v-btn>
+      <!--        <v-btn @click="change_have_file">have_file</v-btn>-->
     </v-content>
   </v-app>
 </template>
@@ -36,6 +48,8 @@ import upload from "@/components/upload";
 import login from "@/components/login";
 import file from "@/components/filelist";
 import logo from "@/components/logo";
+import account from "@/components/account";
+// import alert from "@/components/alert";
 
 export default {
   name: 'App',
@@ -44,12 +58,26 @@ export default {
     'upload':upload,
     'login':login,
     'file':file,
-    'logo':logo
+    'logo':logo,
+    'account':account,
+    // 'alert':alert
   },
 
   data: () => ({
-    //
+    have_account : true,
+    have_file : true,
+    upload_success : false
   }),
+
+  methods : {
+    change_have_account() {
+      // this.have_account = !this.have_account
+      this.upload_success = !this.upload_success
+    },
+    change_have_file() {
+      this.have_file = !this.have_file
+    }
+  }
 };
 </script>
 
