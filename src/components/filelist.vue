@@ -3,7 +3,7 @@
         <table>
             <!--eslint-disable-next-line-->
             <tr v-for="file in file_list">
-                <single-file></single-file>
+                <single-file :file = "file"></single-file>
             </tr>
         </table>
     </div>
@@ -11,18 +11,22 @@
 
 <script>
     import single_file from "@/components/single_file";
+    import { mapState } from 'vuex'
 
     export default {
         name: "file",
-        components:{
-            'single-file':single_file
+        components: {
+            'single-file': single_file
+        },
+        computed: {
+            ...mapState([
+                "file_list"
+            ])
         },
         data() {
             return {
-                file_list:[1,1]
             }
         },
-
     };
 </script>
 
