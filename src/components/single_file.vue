@@ -69,6 +69,8 @@
 
 <script>
     import * as qiniu from "qiniu-js";
+    import {TOKEN_URL, UPLOAD_URL} from "@/plugins/url.js"
+    import {mapState} from "vuex";
 
     const putExtra = {
         fname: "",
@@ -84,9 +86,12 @@
     export default {
         name: "single_file",
         props: {
-            file: File,
+            file: Object,
         },
         computed: {
+            ...mapState([
+                "Event"
+            ]),
             file_name() {
                 return this.file.name;
             },
@@ -98,11 +103,11 @@
                 if (this.file.size < 1024) {
                     return this.file.size + "B";
                 } else if (this.file.size < (1024 * 1024)) {
-                    return this.file.size / 1024 + "KB";
+                    return Math.round(this.file.size / 1024) + "KB";
                 } else if (this.file.size < (1024 * 1024 * 1024)) {
-                    return this.file.size / (1024 * 1024) + "MB";
+                    return Math.round(this.file.size / (1024 * 1024)) + "MB";
                 } else {
-                    return this.file.size / (1024 * 1024 * 1024) + "GB";
+                    return Math.round(this.file.size / (1024 * 1024 * 1024)) + "GB";
                 }
             },
             subObject() {
@@ -149,14 +154,14 @@
             },
 
             file_upload() {
-                let file = this.file;
+                let file = this.file.file;
 
-                this.axios.get("/api/uptoken").then((response) => {
+                this.axios.get(TOKEN_URL).then((response) => {
                     let token = response.data.uptoken;
 
-                    this.axios.post("/uploadFile", {
+                    this.axios.post(UPLOAD_URL, {
                         "fileName": this.file_name,
-                        "fileSize": this.file_size,
+                        "fileSize": this.file.size,
                         "fileType": this.file_type
                     }).then((response) => {
                         let key = response.data;
@@ -190,7 +195,7 @@
         },
         watch: {
             progress_value() {
-                if (this.progress_value == 100) {
+                if (this.progress_value >= 100) {
                     this.uploading = false;
                     this.bottom_item_str = "复制分享链接";
                 }
@@ -215,7 +220,13 @@
             if (this.max_right > 0) {
                 setInterval(this.file_name_roll, 20);
             }
-            this.file_upload();
+            if (this.file.file != null) {
+                this.file_upload();
+            } else {
+                this.file_hash = this.file.hash;
+                this.uploading = false;
+                this.progress_value = 100;
+            }
         }
     }
 </script>

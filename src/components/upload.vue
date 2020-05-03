@@ -32,7 +32,14 @@
 
                 input.onchange = () => {
                     let file = input.files[0];
-                    this.set_upload_file(file);
+                    let real_file = {
+                        name : file.name,
+                        size : file.size,
+                        hash : null,
+                        type : null,
+                        file : file
+                    };
+                    this.set_upload_file(real_file);
                 }
             }
         },

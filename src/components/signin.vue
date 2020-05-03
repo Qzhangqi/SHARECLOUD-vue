@@ -22,7 +22,7 @@
 
 <script>
     import {LOGIN_URL} from "@/plugins/url";
-    import {mapState} from "vuex";
+    import {mapMutations, mapState} from "vuex";
 
     export default {
         name: "signin",
@@ -32,6 +32,9 @@
             ])
         },
         methods: {
+            ...mapMutations([
+                "set_upload_file",
+            ]),
             log_in() {
                 if (!this.check_phone_number(this.phone_number)) {
                     this.Event.$emit("fail_alert", {
@@ -48,6 +51,21 @@
                         this.Event.$emit("success_alert", {
                             message: "登录成功",
                             timeout: 2000
+                        });
+
+                        this.axios.get("/files").then((response) => {
+                            for (let f of response.data.data) {
+                                let real_file = {
+                                    name : f.fileName,
+                                    size : f.fileSize,
+                                    hash : f.fileHash,
+                                    type : f.fileType,
+                                    file : null
+                                };
+                                this.set_upload_file(real_file);
+                            }
+                        }).catch((error) => {
+                            console.log(error);
                         });
                     } else {
                         this.Event.$emit("fail_alert", {
