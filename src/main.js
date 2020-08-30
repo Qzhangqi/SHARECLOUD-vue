@@ -25,6 +25,9 @@ let opt = {
   mutations : {
     set_upload_file(state, file) {
       state.file_list.push(file);
+    },
+    delet_upload_file(state) {
+      state.file_list.pop();
     }
   }
 };

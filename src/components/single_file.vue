@@ -69,8 +69,8 @@
 
 <script>
     import * as qiniu from "qiniu-js";
-    import {TOKEN_URL, UPLOAD_URL} from "@/plugins/url.js"
-    import {mapState} from "vuex";
+    import {UPLOAD_URL, DELETE_FILE_URL} from "@/plugins/url.js"
+    import {mapMutations, mapState} from "vuex";
 
     const putExtra = {
         fname: "",
@@ -122,6 +122,21 @@
                         message: "上传失败",
                         timeout: 3000
                     });
+                    this.uploading = false;
+
+                    this.axios.get(DELETE_FILE_URL,{
+                        params: {
+                            'fileHash': this.file_hash
+                        }
+                    }).then(() => {
+                        this.delet_upload_file();
+                    }).catch((error) => {
+                        console.log(error);
+                        this.Event.$emit("fail_alert", {
+                            message: "未知错误",
+                            timeout: 3000
+                        });
+                    });
                 };
 
                 const complete = (res) => {
@@ -140,6 +155,10 @@
             }
         },
         methods: {
+            ...mapMutations([
+                "delet_upload_file",
+            ]),
+
             file_name_roll() {
                 if (this.wait_value <= 100) {
                     this.wait_value += 1;
@@ -156,41 +175,39 @@
             file_upload() {
                 let file = this.file.file;
 
-                this.axios.get(TOKEN_URL).then((response) => {
-                    let token = response.data.uptoken;
-
-                    this.axios.post(UPLOAD_URL, {
-                        "fileName": this.file_name,
-                        "fileSize": this.file.size,
-                        "fileType": this.file_type
-                    }).then((response) => {
-                        let key = response.data;
-                        this.observable = qiniu.upload(file, key, token, putExtra, config);
-                        this.subscription = this.observable.subscribe(this.subObject);
-                        console.log(response);
-                    }).catch((error) => {
-                        console.log(error);
-                    });
-
+                this.axios.post(UPLOAD_URL, {
+                    "fileName": this.file_name,
+                    "fileSize": this.file.size,
+                    "fileType": this.file_type
+                }).then((response) => {
+                    let data = response.data.data;
+                    this.file_hash = data.fileHash;
+                    let token = data.upToken;
+                    this.observable = qiniu.upload(file, this.file_hash, token, putExtra, config);
+                    this.subscription = this.observable.subscribe(this.subObject);
                 }).catch((error) => {
-                    console.log(error);
+                    this.subObject.error(error);
                 });
             },
 
             upload_pause() {
-                if (this.pause == false) {
+                if (this.bottom_item_str == "复制分享链接") {
+                    console.log(this.get_share_url());
+                } else if (this.bottom_item_str == "重新上传") {
+                    this.uploading = true;
+                    this.progress_value = 0;
+                    this.file_upload();
+                } else if (this.bottom_item_str == "暂停") {
                     this.subscription.unsubscribe();
-                    this.pause = true;
                     this.bottom_item_str = "继续";
-                } else {
+                } else if (this.bottom_item_str == "继续") {
                     this.subscription = this.observable.subscribe(this.subObject); //上传文件
-                    this.pause = false;
                     this.bottom_item_str = "暂停";
                 }
             },
 
             get_share_url() {
-                return "http://q9jitegt4.bkt.clouddn.com/" + "";
+                return "http://q9jitegt4.bkt.clouddn.com/" + this.file_hash;
             }
         },
         watch: {
@@ -204,7 +221,6 @@
         data() {
             return {
                 uploading: true,
-                pause: false,
                 bottom_item_str: "暂停",
                 filename_right: 0,
                 max_right: 0,

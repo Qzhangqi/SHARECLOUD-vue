@@ -7,3 +7,5 @@ export const LOGIN_URL = "/login";
 export const TOKEN_URL = "/api/uptoken";
 
 export const UPLOAD_URL = "/uploadFile";
+
+export const DELETE_FILE_URL = "/deleteFile";
